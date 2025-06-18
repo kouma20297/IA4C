@@ -1,5 +1,5 @@
 
-# IA4C - Interactive AI for Community
+# Eラーニング拡張機能
 
 ## 📝 プロジェクト概要
 <!-- 
