@@ -19,5 +19,5 @@ Django REST Framework（DRF）とMSSQL（SQL Server）をDockerベースで構�
 ### 1. リポジトリをクローン
 
 ```bash
-git clone https://github.com/your-org/ia4c.git
+git clone https://github.com/kouma20297/IA4C
 cd ia4c
