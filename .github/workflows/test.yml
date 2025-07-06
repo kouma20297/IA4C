@@ -22,13 +22,14 @@ jobs:
         ports:
           - 3306:3306
         options: >-
-          --health-cmd="mysqladmin ping"
+          --health-cmd="mysqladmin ping -h localhost"
           --health-interval=10s
           --health-timeout=5s
-          --health-retries=3
+          --health-retries=5
 
     steps:
-    - uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v3
 
     - name: Set up Python
       uses: actions/setup-python@v4
@@ -40,12 +41,34 @@ jobs:
         cd backend
         pip install -r requirements.txt
 
+    - name: Copy .env.ci to .env
+      run: |
+        cp backend/.env.ci backend/.env
+        echo "===== .env copied to .env ====="
+
+    - name: Show .env contents for debug
+      run: |
+        echo "===== .env content ====="
+        cat backend/.env
+
+    - name: Wait for MySQL to be ready
+      run: |
+        until mysqladmin ping -h db -u"${MYSQL_USER}" -p"${MYSQL_PASSWORD}" --silent; do
+          echo "Waiting for MySQL..."
+          sleep 5
+        done
     - name: Run migrations
       run: |
         cd backend
         python manage.py migrate
+      env:
+        MYSQL_USER: ia4c_user
+        MYSQL_PASSWORD: securepass
 
     - name: Run tests
       run: |
         cd backend
         pytest
+      env:
+        MYSQL_USER: ia4c_user
+        MYSQL_PASSWORD: securepass
