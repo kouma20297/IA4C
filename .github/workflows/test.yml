@@ -11,6 +11,13 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    env:
+      MYSQL_HOST: db
+      MYSQL_DATABASE: ia4c_dev
+      MYSQL_USER: ia4c_user
+      MYSQL_PASSWORD: securepass
+      MYSQL_ROOT_PASSWORD: rootpass
+
     services:
       db:
         image: mysql:8.0
@@ -22,7 +29,7 @@ jobs:
         ports:
           - 3306:3306
         options: >-
-          --health-cmd="mysqladmin ping -h localhost"
+          --health-cmd="mysqladmin ping -h db -uroot -prootpass"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
@@ -46,29 +53,25 @@ jobs:
         cp backend/.env.ci backend/.env
         echo "===== .env copied to .env ====="
 
-    - name: Show .env contents for debug
+    - name: Export .env variables
       run: |
-        echo "===== .env content ====="
-        cat backend/.env
+        set -o allexport
+        source backend/.env
+        set +o allexport
 
     - name: Wait for MySQL to be ready
       run: |
-        until mysqladmin ping -h db -u"${MYSQL_USER}" -p"${MYSQL_PASSWORD}" --silent; do
+        until mysqladmin ping -h "$MYSQL_HOST" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" --silent; do
           echo "Waiting for MySQL..."
           sleep 5
         done
+
     - name: Run migrations
       run: |
         cd backend
         python manage.py migrate
-      env:
-        MYSQL_USER: ia4c_user
-        MYSQL_PASSWORD: securepass
 
     - name: Run tests
       run: |
         cd backend
         pytest
-      env:
-        MYSQL_USER: ia4c_user
-        MYSQL_PASSWORD: securepass
