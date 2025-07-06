@@ -21,7 +21,7 @@ DATABASES = {
         'NAME': 'ia4c_dev',
         'USER': 'ia4c_user',
         'PASSWORD': 'securepass',
-        'HOST': 'mysql',  # ← ここ重要（services のキーと一致させる）
+        'HOST': 'db',  # ← ここ重要（services のキーと一致させる）
         'PORT': '3306',
     }
 }
