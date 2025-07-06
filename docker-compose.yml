@@ -1,0 +1,40 @@
+version: '3.9'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: ia4c-db
+    restart: always
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./infra/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    env_file:
+      - .env 
+
+  web:
+    build:
+      context: ./backend
+    container_name: ia4c-web
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+    - ./backend:/app
+    depends_on:
+    - db
+    env_file:
+      - .env
+    command: 
+      sh -c "sleep 10 &&
+           python manage.py migrate &&
+           python manage.py runserver 0.0.0.0:8000"
+
+volumes:
+  mysql_data:
