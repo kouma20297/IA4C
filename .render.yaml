@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: ia4c-api
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn els_4c.wsgi:application
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: els_4c.settings.production
+      - key: SECRET_KEY
+        sync: false
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ia4c-db
+          property: connectionString
+databases:
+  - name: ia4c-db

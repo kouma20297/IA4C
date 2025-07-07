@@ -1,0 +1,2 @@
+GRANT ALL PRIVILEGES ON ia4c_dev.* TO 'ia4c_user'@'%';
+FLUSH PRIVILEGES;
