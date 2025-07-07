@@ -18,10 +18,10 @@ ALLOWED_HOSTS = ["*"]
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'ia4c_dev',
-        'USER': 'ia4c_user',
-        'PASSWORD': 'securepass',
-        'HOST': 'db',  # ← ここ重要（services のキーと一致させる）
+        'NAME': os.getenv("MYSQL_DATABASE", "ia4c_dev"),
+        'USER': os.getenv("MYSQL_USER", "ia4c_user"),
+        'PASSWORD': os.getenv("MYSQL_PASSWORD", "securepass"),
+        'HOST': os.getenv("MYSQL_HOST"),
         'PORT': '3306',
     }
 }
