@@ -16,11 +16,12 @@ jobs:
         env:
           MYSQL_ROOT_PASSWORD: rootpass
           MYSQL_DATABASE: ia4c_dev
-          MYSQL_USER: root
+          MYSQL_USER: ia4c_user
+          MYSQL_PASSWORD: securepass
         ports:
           - 3306:3306
         options: >-
-          --health-cmd="mysqladmin ping -h db -uroot -prootpass"
+          --health-cmd="mysqladmin ping -h db -u ia4c_user -p securepass"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=10
@@ -28,8 +29,8 @@ jobs:
     env:
       MYSQL_HOST: db
       MYSQL_DATABASE: ia4c_dev
-      MYSQL_USER: root
-      MYSQL_PASSWORD: rootpass
+      MYSQL_USER: ia4c_user
+      MYSQL_PASSWORD: securepass
       DJANGO_SECRET_KEY: devsecretkey
       DJANGO_DEBUG: True
       DJANGO_ALLOWED_HOSTS: "localhost 127.0.0.1 0.0.0.0"
