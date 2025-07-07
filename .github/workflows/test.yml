@@ -17,20 +17,19 @@ jobs:
           MYSQL_ROOT_PASSWORD: rootpass
           MYSQL_DATABASE: ia4c_dev
           MYSQL_USER: root
-          MYSQL_PASSWORD: rootpass  # root のパスワード
         ports:
           - 3306:3306
         options: >-
-          --health-cmd="mysqladmin ping -h 127.0.0.1"
+          --health-cmd="mysqladmin ping -h db -uroot -prootpass"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=10
 
     env:
-      MYSQL_HOST: 127.0.0.1
+      MYSQL_HOST: db
       MYSQL_DATABASE: ia4c_dev
-      MYSQL_USER: ia4c_user
-      MYSQL_PASSWORD: securepass
+      MYSQL_USER: root
+      MYSQL_PASSWORD: rootpass
       DJANGO_SECRET_KEY: devsecretkey
       DJANGO_DEBUG: True
       DJANGO_ALLOWED_HOSTS: "localhost 127.0.0.1 0.0.0.0"
