@@ -1,7 +1,7 @@
 version: '3.9'
 
 services:
-  mysql:
+  db:
     image: mysql:8.0
     container_name: ia4c-db
     restart: always
@@ -28,7 +28,7 @@ services:
     volumes:
     - ./backend:/app
     depends_on:
-    - mysql
+    - db
     env_file:
       - .env
     command: 
