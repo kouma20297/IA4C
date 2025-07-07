@@ -16,8 +16,8 @@ jobs:
         env:
           MYSQL_ROOT_PASSWORD: rootpass
           MYSQL_DATABASE: ia4c_dev
-          MYSQL_USER: ia4c_user
-          MYSQL_PASSWORD: securepass
+          MYSQL_USER: root
+          MYSQL_PASSWORD: rootpass  # root のパスワード
         ports:
           - 3306:3306
         options: >-
