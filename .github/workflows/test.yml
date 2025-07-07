@@ -26,8 +26,7 @@ jobs:
           MYSQL_DATABASE: ia4c_dev
           MYSQL_USER: ia4c_user
           MYSQL_PASSWORD: securepass
-        ports:
-          - 3306:3306
+       
         options: >-
           --health-cmd="mysqladmin ping -h db -uroot -prootpass"
           --health-interval=10s
