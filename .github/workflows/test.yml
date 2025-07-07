@@ -1,18 +1,17 @@
-name: Run Django Tests
+name: Django CI with MySQL
 
 on:
   push:
-    branches: [ develop ]
+    branches:
+      - develop
   pull_request:
-    branches: [ develop ]
-  workflow_dispatch:
 
 jobs:
   test:
     runs-on: ubuntu-latest
 
     services:
-      db:
+      mysql:
         image: mysql:8.0
         env:
           MYSQL_ROOT_PASSWORD: rootpass
@@ -22,73 +21,56 @@ jobs:
         ports:
           - 3306:3306
         options: >-
-          --health-cmd="mysqladmin ping -h localhost"
+          --health-cmd="mysqladmin ping -h 127.0.0.1"
           --health-interval=10s
           --health-timeout=5s
-          --health-retries=5
+          --health-retries=10
+
+    env:
+      MYSQL_HOST: 127.0.0.1
+      MYSQL_DATABASE: ia4c_dev
+      MYSQL_USER: ia4c_user
+      MYSQL_PASSWORD: securepass
+      DJANGO_SECRET_KEY: devsecretkey
+      DJANGO_DEBUG: True
+      DJANGO_ALLOWED_HOSTS: "localhost 127.0.0.1 0.0.0.0"
+      AUTH0_DOMAIN: dev-7kw7hbs8zsir4onb.jp.auth0.com
+      AUTH0_API_IDENTIFIER: https://ia4c-api
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: 3.11
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
 
-    - name: Install dependencies
-      run: |
-        cd backend
-        pip install -r requirements.txt
+      - name: Install dependencies
+        run: |
+          cd backend
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
-    - name: Copy .env.ci to .env
-      run: |
-        cp backend/.env.ci backend/.env
-        echo "===== .env copied to .env ====="
-        cat backend/.env
+      - name: Copy .env.ci to .env
+        run: |
+          cp backend/.env.ci backend/.env
+          echo "===== .env copied to .env ====="
 
-    - name: Export environment variables from .env
-      run: |
-        set -o allexport
-        source backend/.env
-        set +o allexport
+      - name: Wait for MySQL
+        run: |
+          echo "Waiting for MySQL to be ready..."
+          until mysqladmin ping -h "$MYSQL_HOST" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" --silent; do
+            echo "Waiting for MySQL..."
+            sleep 3
+          done
 
-    - name: Install mysql-client
-      run: sudo apt-get update && sudo apt-get install -y mysql-client
+      - name: Run migrations
+        run: |
+          cd backend
+          python manage.py migrate
 
-    - name: Wait for MySQL to be ready
-      run: |
-        until mysqladmin ping -h "$MYSQL_HOST" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" --silent; do
-          echo "Waiting for MySQL..."
-          sleep 5
-        done
-      env:
-        MYSQL_HOST: db
-        MYSQL_USER: ia4c_user
-        MYSQL_PASSWORD: securepass
-
-    - name: Debug MySQL connection
-      run: |
-        mysql -h "$MYSQL_HOST" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" -e "SHOW DATABASES;"
-      env:
-        MYSQL_HOST: db
-        MYSQL_USER: ia4c_user
-        MYSQL_PASSWORD: securepass
-
-    - name: Run migrations
-      run: |
-        cd backend
-        python manage.py migrate
-      env:
-        MYSQL_HOST: db
-        MYSQL_USER: ia4c_user
-        MYSQL_PASSWORD: securepass
-
-    - name: Run tests
-      run: |
-        cd backend
-        pytest
-      env:
-        MYSQL_HOST: db
-        MYSQL_USER: ia4c_user
-        MYSQL_PASSWORD: securepass
+      - name: Run tests
+        run: |
+          cd backend
+          pytest
