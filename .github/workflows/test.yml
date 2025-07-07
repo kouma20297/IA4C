@@ -14,15 +14,22 @@ jobs:
       db:
         image: mysql:8.0
         env:
-          MYSQL_ROOT_PASSWORD: rootpass 
+          MYSQL_ROOT_PASSWORD: rootpass
           MYSQL_DATABASE: ia4c_dev
           MYSQL_USER: ia4c_user
           MYSQL_PASSWORD: securepass
         ports:
           - 3306:3306
-        
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -u ia4c_user -psecurepass"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+        volumes:
+          - ./infra/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+
     env:
-      MYSQL_HOST: db
+      MYSQL_HOST: 127.0.0.1
       MYSQL_DATABASE: ia4c_dev
       MYSQL_USER: ia4c_user
       MYSQL_PASSWORD: securepass
@@ -50,7 +57,6 @@ jobs:
       - name: Copy .env.ci to .env
         run: |
           cp backend/.env.ci backend/.env
-          echo "===== .env copied to .env ====="
 
       - name: Wait for MySQL
         run: |
