@@ -11,13 +11,6 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
-    env:
-      MYSQL_HOST: db
-      MYSQL_DATABASE: ia4c_dev
-      MYSQL_USER: ia4c_user
-      MYSQL_PASSWORD: securepass
-      MYSQL_ROOT_PASSWORD: rootpass
-
     services:
       db:
         image: mysql:8.0
@@ -26,9 +19,10 @@ jobs:
           MYSQL_DATABASE: ia4c_dev
           MYSQL_USER: ia4c_user
           MYSQL_PASSWORD: securepass
-       
+        ports:
+          - 3306:3306
         options: >-
-          --health-cmd="mysqladmin ping -h db -uroot -prootpass"
+          --health-cmd="mysqladmin ping -h localhost"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
@@ -51,12 +45,16 @@ jobs:
       run: |
         cp backend/.env.ci backend/.env
         echo "===== .env copied to .env ====="
+        cat backend/.env
 
-    - name: Export .env variables
+    - name: Export environment variables from .env
       run: |
         set -o allexport
         source backend/.env
         set +o allexport
+
+    - name: Install mysql-client
+      run: sudo apt-get update && sudo apt-get install -y mysql-client
 
     - name: Wait for MySQL to be ready
       run: |
@@ -64,13 +62,33 @@ jobs:
           echo "Waiting for MySQL..."
           sleep 5
         done
+      env:
+        MYSQL_HOST: db
+        MYSQL_USER: ia4c_user
+        MYSQL_PASSWORD: securepass
+
+    - name: Debug MySQL connection
+      run: |
+        mysql -h "$MYSQL_HOST" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" -e "SHOW DATABASES;"
+      env:
+        MYSQL_HOST: db
+        MYSQL_USER: ia4c_user
+        MYSQL_PASSWORD: securepass
 
     - name: Run migrations
       run: |
         cd backend
         python manage.py migrate
+      env:
+        MYSQL_HOST: db
+        MYSQL_USER: ia4c_user
+        MYSQL_PASSWORD: securepass
 
     - name: Run tests
       run: |
         cd backend
         pytest
+      env:
+        MYSQL_HOST: db
+        MYSQL_USER: ia4c_user
+        MYSQL_PASSWORD: securepass
