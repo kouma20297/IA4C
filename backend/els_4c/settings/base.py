@@ -5,7 +5,8 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # セキュリティキーとデバッグ設定（Renderでは環境変数で管理）
-SECRET_KEY = os.environ.get("SECRET_KEY")
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
+
 DEBUG = os.environ.get("DEBUG", "True") == "True"
 
 # ホスト許可（スペース区切りで複数指定可能）
