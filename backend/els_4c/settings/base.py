@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     'els_4c',
     'users',
     'threads',
+    'answers',
 
     # サードパーティ
     'rest_framework',
