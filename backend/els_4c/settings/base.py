@@ -1,27 +1,17 @@
-from pathlib import Path
 import os
-from dotenv import load_dotenv
+from pathlib import Path
 
-load_dotenv()
-
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+# プロジェクトのベースディレクトリを定義
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# セキュリティキーとデバッグ設定（Renderでは環境変数で管理）
+SECRET_KEY = os.environ.get("SECRET_KEY")
+DEBUG = os.environ.get("DEBUG", "True") == "True"
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
+# ホスト許可（スペース区切りで複数指定可能）
+ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "").split()
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-14(f#$d7-58c4w6=4#^4a^!gk%)y8$hosos1h$u7q-o2a37ju_'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = []
-
-
-# Application definition
-
+# アプリケーション定義
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -29,14 +19,20 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    # プロジェクトアプリ
     'els_4c',
     'users',
-    'rest_framework',
     'threads',
+
+    # サードパーティ
+    'rest_framework',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'corsheaders.middleware.CorsMiddleware',  # CORSのために先頭に追加
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -65,81 +61,17 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'els_4c.wsgi.application'
 
+# 認証ユーザーモデル
+AUTH_USER_MODEL = 'users.User'
 
-# Database
-# https://docs.djangoproject.com/en/4.2/ref/settings/#databases
+# 静的ファイル設定（開発/本番兼用）
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # 本番用collectstatic出力先
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
-
-
-# Password validation
-# https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
-
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
-]
-
-
-# Internationalization
-# https://docs.djangoproject.com/en/4.2/topics/i18n/
-
-LANGUAGE_CODE = 'ja'
-
-TIME_ZONE = 'Asia/Tokyo'
-
-USE_I18N = True
-
-USE_TZ = True
-
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.2/howto/static-files/
-
-STATIC_URL = 'static/'
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
-
+# デフォルトの主キーの型
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
-
-AUTH_USER_MODEL = 'users.User' 
-
-# REST_FRAMEWORK = {
-#     'DEFAULT_AUTHENTICATION_CLASSES': [
-#         'users.auth0backend.Auth0JWTAuthentication',
-#     ],
-#     'DEFAULT_PERMISSION_CLASSES': [
-#         'rest_framework.permissions.IsAuthenticated',
-#     ]
-# }
-
-# REST_FRAMEWORK = {
-#     "DEFAULT_AUTHENTICATION_CLASSES": [
-#         "users.auth0backend.Auth0JWTAuthentication",  
-#     ],
-#     "DEFAULT_PERMISSION_CLASSES": [
-#         "rest_framework.permissions.IsAuthenticated",
-#     ],
-# }
-
+# REST Framework設定
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [],
     'DEFAULT_PERMISSION_CLASSES': [
@@ -147,8 +79,31 @@ REST_FRAMEWORK = {
     ],
 }
 
-
-
+# Auth0（使うなら）
 AUTH0_DOMAIN = os.environ.get("AUTH0_DOMAIN")
 AUTH0_API_IDENTIFIER = os.environ.get("AUTH0_API_IDENTIFIER")
 
+# CORS設定（任意、必要に応じて）
+CORS_ALLOW_ALL_ORIGINS = True
+
+# 国際化設定
+LANGUAGE_CODE = 'ja'
+
+TIME_ZONE = 'Asia/Tokyo'
+
+USE_I18N = True
+USE_L10N = True  # ロケール形式（日本の数値や日付）を使う
+USE_TZ = True
+
+# ログ設定
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': { 'class': 'logging.StreamHandler' },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+}

@@ -1,20 +1,18 @@
-import os
 from .base import *
-from pathlib import Path
-from dotenv import load_dotenv
+import os
 
 DEBUG = False
-ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "").split(" ")
 
-load_dotenv("/etc/secrets/.env.production")  # または settings/base.py 経由でもOK
+# 静的ファイル設定（Render用）
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
 DATABASES = {
     'default': {
-        'ENGINE': os.getenv('DB_ENGINE', 'django.db.backends.postgresql'),
-        'NAME': os.getenv('DB_NAME'),
-        'USER': os.getenv('DB_USER'),
-        'PASSWORD': os.getenv('DB_PASSWORD'),
-        'HOST': os.getenv('DB_HOST'),
-        'PORT': os.getenv('DB_PORT', '5432'),
+        'ENGINE': os.environ.get("DB_ENGINE", "django.db.backends.postgresql"),
+        'NAME': os.environ.get("DB_NAME"),
+        'USER': os.environ.get("DB_USER"),
+        'PASSWORD': os.environ.get("DB_PASSWORD"),
+        'HOST': os.environ.get("DB_HOST"),
+        'PORT': os.environ.get("DB_PORT", "5432"),
     }
 }
