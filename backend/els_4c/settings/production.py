@@ -1,15 +1,19 @@
-from .base import *
+import os
+from pathlib import Path
+from dotenv import load_dotenv
 
 DEBUG = False
 ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "").split(" ")
 
+load_dotenv("/etc/secrets/.env.production")  # または settings/base.py 経由でもOK
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',  # Renderでは必要に応じて変更
-        'NAME': os.getenv("MYSQL_DATABASE"),
-        'USER': os.getenv("MYSQL_USER"),
-        'PASSWORD': os.getenv("MYSQL_PASSWORD"),
-        'HOST': os.getenv("MYSQL_HOST", "db"),
-        'PORT': '3306',
+        'ENGINE': os.getenv('DB_ENGINE', 'django.db.backends.postgresql'),
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'HOST': os.getenv('DB_HOST'),
+        'PORT': os.getenv('DB_PORT', '5432'),
     }
 }
