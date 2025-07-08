@@ -1,14 +1,19 @@
-Django>=4.2
+# 基本パッケージ
+Django>=4.2,<5.0
 djangorestframework
 python-dotenv
-mysqlclient
 gunicorn
 django-cors-headers
-psycopg2-binary
 
-# 以下は任意（必要に応じて）
+# データベースドライバ
+psycopg2-binary     # 本番用：PostgreSQL
+mysqlclient         # 開発用：MySQL（ローカル）
+
+# テスト関連（任意）
 pytest
 pytest-django
+
+# ユーティリティ（任意）
 requests
 ipython
 Pillow
